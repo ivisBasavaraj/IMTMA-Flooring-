@@ -6,11 +6,17 @@ import {
   Grid, 
   Magnet, 
   Save, 
-  Download 
+  Download,
+  Share2
 } from 'lucide-react';
 import { useCanvasStore } from '../../store/canvasStore';
+import { PDFExport } from '../export/PDFExport';
 
-export const CanvasControls: React.FC = () => {
+interface CanvasControlsProps {
+  stageRef: React.RefObject<any>;
+}
+
+export const CanvasControls: React.FC<CanvasControlsProps> = ({ stageRef }) => {
   const { zoom, grid, setZoom, setGrid } = useCanvasStore();
   
   const handleZoomIn = () => {
@@ -33,14 +39,16 @@ export const CanvasControls: React.FC = () => {
     setGrid(grid.enabled, grid.size, !grid.snap);
   };
   
-  const handleSave = () => {
-    // Implementation for saving would go here
-    console.log('Save floor plan');
-  };
-  
-  const handleExport = () => {
-    // Implementation for exporting would go here
-    console.log('Export floor plan');
+  const handleShare = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Event Floor Plan',
+        url: window.location.href
+      });
+    } else {
+      // Fallback to copying URL
+      navigator.clipboard.writeText(window.location.href);
+    }
   };
 
   return (
@@ -98,20 +106,14 @@ export const CanvasControls: React.FC = () => {
       <div className="w-px h-6 bg-gray-200 mx-1"></div>
       
       <button
-        onClick={handleSave}
+        onClick={handleShare}
         className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-        title="Save Floor Plan"
+        title="Share Floor Plan"
       >
-        <Save size={20} />
+        <Share2 size={20} />
       </button>
       
-      <button
-        onClick={handleExport}
-        className="p-2 hover:bg-gray-100 rounded-md transition-colors"
-        title="Export Floor Plan"
-      >
-        <Download size={20} />
-      </button>
+      <PDFExport stageRef={stageRef} />
     </div>
   );
 };
